@@ -15,8 +15,8 @@ if __name__ == '__main__':
         "maxWorkerVM": 0,
         "gitlocation": "sanjeevm0/kcluster/master",
         "gitscript": "scripts/bootstrap.sh",
-        "masternode": True,
-        "workernode": False,
+        "masterNode": True,
+        "workerNode": False,
         "first_infra_node": True,
         "bootstrap": True
     }
