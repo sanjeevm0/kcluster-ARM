@@ -21,7 +21,7 @@ if __name__ == '__main__':
         "bootstrap": True
     }
     with open(configFile, 'r') as fp:
-        config = config.update(yaml.load(fp))
+        config.update(yaml.load(fp))
     with open('/home/{0}/.ssh/authorized_keys'.format(config['adminUsername']), 'r') as fp:
         sshKeyData = fp.read().strip()
     config['sshKeyData'] = sshKeyData
