@@ -1,0 +1,10 @@
+{
+    "$schema": "https://aka.ms/azure-quickstart-templates-metadata-schema#",
+    "type": "QuickStart",
+    "itemDisplayName": "KubeCluster",
+    "description": "Kube Cluster",
+    "summary": "Deploys a Kubernetes powered cluster",
+    "githubUsername": "sanjeevm0",
+    "dateUpdated": "2019-04-01"
+  }
+  

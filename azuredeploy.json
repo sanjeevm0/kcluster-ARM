@@ -1,0 +1,413 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "clusterNameDesired": {
+            "type": "string",
+            "defaultValue": "[uniqueString(resourceGroup().id)]",
+            "metadata": {
+                "description": "Name of cluster - should be lowercase, if it is not, a lowercase version will be used."
+            }
+        },
+        "location": {
+            "type": "string",
+            "defaultValue": "[resourceGroup().location]",
+            "metadata": {
+                "description": "Location of resources."
+            }
+        },
+        "adminUsername": {
+            "type": "string",
+            "metadata": {
+                "description": "Username on machines."
+            }            
+        },
+        "adminPassword": {
+            "type": "securestring",
+            "defaultValue": "[concat('UU##12', uniqueString(resourceGroup().id, parameters('sshKeyData'), 'pp', '!'))]",
+            "metadata": {
+              "description": "Password for the virtual machines ."
+            }
+        },
+        "sshKeyData": {
+            "type": "string",
+            "defaultValue": "",
+            "metadata": {
+                "description": "The public SSH key data."
+            }
+        },
+        "clusterAdmins": {
+            "type": "string",
+            "defaultValue": "",
+            "metadata": {
+                "description": "Comma separated list of users allowed to log into DLWorkspace webportal as administrator and manage the cluster"
+            }
+        },
+        "devSourceIP": {
+            "type": "array",
+            "defaultValue": ["10.0.0.0/8"],
+            "metadata": {
+                "description": "Array of IP prefixes of machines which can be used to connect to the nodes."
+            }
+        },
+        "numberOfInfraVM": {
+            "type": "int",
+            "defaultValue": 1,
+            "metadata": {
+                "description": "Number of infra-VM to deploy."
+            }
+        },
+        "infraVMSize": {
+            "type": "string",
+            "defaultValue": "Standard_DS2_v2",
+            "metadata": {
+                "description": "Size of the infra-VM. Use a CPU VM for infra-VM." 
+            }
+        },
+        "minWorkerVM": {
+            "type": "int",
+            "defaultValue": 1,
+            "metadata": {
+                "description": "Minimum number of worker-VM to deploy."
+            }
+        },
+        "maxWorkerVM": {
+            "type": "int",
+            "defaultValue": 3,
+            "metadata": {
+                "description": "Maximum number of worker-VM to deploy."
+            }
+        },
+        "workerVMSize": {
+            "type": "string",
+            "defaultValue": "Standard_DS2_v2",
+            "metadata": {
+                "description": "Size of the worker-VM. Use a GPU VM for worker-VM."
+            }
+        },
+        "gitlocation": {
+            "type": "string",
+            "metadata": {
+                "description": "The repo and branch where code is located."
+            },
+            "defaultValue": "sanjeevm0/kcluster/master"
+        },
+        "gitscript": {
+            "type": "string",
+            "metadata": {
+                "description": "The script to run."
+            },
+            "defaultValue": "scripts/bootstrap.sh"
+        },
+        "gitdeploykey": {
+            "type": "string",
+            "metadata": {
+                "description": "The git deploy key."
+            },
+            "defaultValue": ""
+        },
+        "useazurecni": {
+            "type": "bool",
+            "metadata": {
+                "description": "Use Azure CNI or not."
+            },
+            "defaultValue": false
+        },
+        "_artifactsLocation": {
+            "type": "string",
+            "metadata": {
+                "description": "The base URI where artifacts required by this template are located including a trailing '/'"
+            },
+            "defaultValue": "https://raw.githubusercontent.com/sanjeevm0/ARMConfig/master/"
+        },
+        "_artifactsLocationSasToken": {
+            "type": "securestring",
+            "metadata": {
+                "description": "The sasToken required to access _artifactsLocation.  When the template is deployed using the accompanying scripts, a sasToken will be automatically generated. Use the defaultValue if the staging location is not secured."
+            },
+            "defaultValue": ""
+        }
+    },
+    "variables": {
+        "clusterName": "[toLower(parameters('clusterNameDesired'))]",
+        "standardStorageAccountType": "Standard_LRS",
+        "imagePublisher": "Canonical",
+        "imageOffer": "UbuntuServer",
+        "virtualNetworkName": "[concat(resourceGroup().name, '-VNet')]",
+        "vmprefix": "10.240.1",
+        "vmsubnet": "10.240.0.0/16",
+        "podprefix": "10.240",
+        "podsubnet": "10.240.0.0/16",
+        "gitdeploykeyB": "[base64(parameters('gitdeploykey'))]",
+        "ubuntuOSVersion": "18.04-LTS",
+        "params": {
+            "resource_group": "[resourceGroup().name]",
+            "clusterName": "[variables('clusterName')]",
+            "location": "[parameters('location')]",
+            "adminUsername": "[parameters('adminUsername')]",
+            "adminPassword": "[parameters('adminPassword')]",
+            "sshKeyData": "[parameters('sshKeyData')]",
+            "clusterAdmins": "[parameters('clusterAdmins')]",
+            "devSourceIP": "[parameters('devSourceIP')]",
+            "machine_ip_prefix": "[variables('vmprefix')]",
+            "pod_ip_prefix": "[variables('podprefix')]",
+            "pod_cidr": "[variables('podsubnet')]",
+            "use_azure_cni": "[parameters('useazurecni')]",
+            "numberOfInfraVM": "[parameters('numberOfInfraVM')]",
+            "infraVMSize": "[parameters('infraVMSize')]",
+            "minWorkerVM": "[parameters('minWorkerVM')]",
+            "maxWorkerVM": "[parameters('maxWorkerVM')]",
+            "workerVMSize": "[parameters('workerVMSize')]",
+            "ubuntuOSVersion": "[variables('ubuntuOSVersion')]",
+            "gitlocation": "[parameters('gitlocation')]",
+            "gitscript": "[parameters('gitscript')]",
+            "gitdeploykeyB": "[variables('gitdeploykeyB')]",
+            "_artifactsLocation": "[parameters('_artifactsLocation')]",
+            "_artifactsLocationSasToken": "[parameters('_artifactsLocationSasToken')]",
+            "standardStorageAccountType": "[variables('standardStorageAccountType')]",
+            "imagePublisher": "[variables('imagePublisher')]",
+            "imageOffer": "[variables('imageOffer')]",
+            "masterNode": true,
+            "workerNode": false,
+            "bootstrap": true
+        },
+        "singleQuote": "'",
+        "gitdeploykeyQ": "[concat(variables('singleQuote'), variables('gitDeployKeyB'), variables('singleQuote'))]",
+        "paramsStr": "[base64(string(variables('params')))]",
+        "paramsQ": "[concat(variables('singleQuote'), variables('paramsStr'), variables('singleQuote'))]",
+        "ReaderRole": "[concat('/subscriptions/', subscription().subscriptionId, '/providers/Microsoft.Authorization/roleDefinitions/', 'acdd72a7-3385-48ef-bd42-f606fba81ae7')]",
+        "ContributorRole": "[concat('/subscriptions/', subscription().subscriptionId, '/providers/Microsoft.Authorization/roleDefinitions/', 'b24988ac-6180-42a0-ab88-20f7382dd24c')]",
+        "OwnerRole": "[concat('/subscriptions/', subscription().subscriptionId, '/providers/Microsoft.Authorization/roleDefinitions/', '8e3af657-a8ff-443c-a75c-2fe8c4bcb635')]"
+    },
+    "resources": [
+        {
+            "type": "Microsoft.Network/virtualNetworks",
+            "name": "[variables('virtualNetworkName')]",
+            "apiVersion": "2018-02-01",
+            "location": "[parameters('location')]",
+            "properties": {
+                "addressSpace": {
+                    "addressPrefixes": ["10.240.0.0/16"]
+                },
+                "subnets": [
+                    {
+                        "name": "VMSubnet",
+                        "properties": {
+                            "addressPrefix": "10.240.0.0/16"
+                        }
+                    }
+                ]
+            }
+        },
+        {
+            "type": "Microsoft.Network/networkSecurityGroups",
+            "name": "[concat(variables('clusterName'), '-NSG')]",
+            "apiVersion": "2018-02-01",
+            "location": "[parameters('location')]",
+            "properties": {
+                "securityRules": [
+                    {
+                        "name": "allowalltcp",
+                        "properties": {
+                            "protocol": "Tcp",
+                            "access": "Allow",
+                            "priority": 1000,
+                            "direction": "Inbound",
+                            "sourceAddressPrefix": "*",
+                            "sourcePortRange": "*",
+                            "destinationAddressPrefix": "*",
+                            "destinationPortRanges": [
+                                "80",
+                                "6443",
+                                "6000",
+                                "30000-32767"
+                            ]
+                        }
+                    },
+                    {
+                        "name": "allowdevtcp",
+                        "properties": {
+                            "protocol": "Tcp",
+                            "access": "Allow",
+                            "priority": 900,
+                            "direction": "Inbound",
+                            "sourceAddressPrefixes": "[parameters('devSourceIP')]",
+                            "sourcePortRange": "*",
+                            "destinationAddressPrefix": "*",
+                            "destinationPortRanges": [
+                                "22"
+                            ]
+                        }
+                    }
+                ]
+            }
+        },
+        {
+            "type": "Microsoft.Network/publicIPAddresses",
+            "copy": {
+                "name": "infraVMPublicIPLoop",
+                "count": "[parameters('numberOfInfraVM')]"
+            },
+            "sku": {
+                "name": "Basic"
+            },
+            "name": "[concat(variables('clusterName'), '-infra-', copyIndex(1), '-PublicIP')]",
+            "apiVersion": "2018-02-01",
+            "location": "[parameters('location')]",
+            "properties": {
+                "publicIPAllocationMethod": "Dynamic",
+                "dnsSettings": {
+                    "domainNameLabel": "[toLower(concat(variables('clusterName'), '-infra-', copyIndex(1)))]"
+                }
+            }
+        },
+        {
+            "type": "Microsoft.Network/networkInterfaces",
+            "copy": {
+                "name": "infraVMNICLoop",
+                "count": "[parameters('numberOfInfraVM')]"
+            },
+            "name": "[concat(variables('clusterName'), '-infra-', copyIndex(1), '-VMNic')]",
+            "apiVersion": "2018-02-01",
+            "location": "[parameters('location')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/virtualNetworks', variables('virtualNetworkName'))]",
+                "[resourceId('Microsoft.Network/networkSecurityGroups', concat(variables('clusterName'), '-NSG'))]",
+                "[resourceId('Microsoft.Network/publicIPAddresses', concat(variables('clusterName'), '-infra-', copyIndex(1), '-PublicIP'))]"
+            ],
+            "properties": {
+                "ipConfigurations": [
+                    {
+                        "name": "[concat(variables('clusterName'), '-infra-', copyIndex(1), '-IPConfig')]",
+                        "properties": {
+                            "privateIPAddress": "[concat(variables('vmprefix'), '.', copyIndex(1))]",
+                            "privateIPAllocationMethod": "Static",
+                            "privateIPAddressVersion": "IPv4",
+                            "publicIPAddress": {
+                                "id": "[resourceId('Microsoft.Network/publicIPAddresses', concat(variables('clusterName'), '-infra-', copyIndex(1), '-PublicIP'))]"
+                            },
+                            "subnet": {
+                                "id": "[resourceId('Microsoft.Network/virtualNetworks/subnets', variables('virtualNetworkName'), 'VMSubnet')]"
+                            }
+                        }
+                    }
+                ],
+                "networkSecurityGroup": {
+                    "id": "[resourceId('Microsoft.Network/networkSecurityGroups', concat(variables('clusterName'), '-NSG'))]"
+                }
+            }
+        },
+        {
+            "type": "Microsoft.Compute/virtualMachines",
+            "copy": {
+                "name": "infraVMLoop",
+                "count": "[parameters('numberOfInfraVM')]"
+            },
+            "name": "[concat(variables('clusterName'), '-infra-', copyIndex(1))]",
+            "apiVersion": "2017-12-01",
+            "location": "[parameters('location')]",
+            "identity": {
+                "type": "SystemAssigned"
+            },
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/networkInterfaces', concat(variables('clusterName'), '-infra-', copyIndex(1), '-VMNic'))]"
+            ],
+            "properties": {
+                "hardwareProfile": {
+                    "vmSize": "[parameters('infraVMSize')]"
+                },
+                "storageProfile": {
+                    "imageReference": {
+                        "publisher": "[variables('imagePublisher')]",
+                        "offer": "[variables('imageOffer')]",
+                        "sku": "[variables('ubuntuOSVersion')]",
+                        "version": "latest"
+                    },
+                    "osDisk": {
+                        "createOption": "FromImage",
+                        "caching": "ReadWrite",
+                        "managedDisk": {
+                            "storageAccountType": "[variables('standardStorageAccountType')]"
+                        }
+                    }
+                },
+                "osProfile": {
+                    "computerName": "[concat(variables('clusterName'), '-infra-', copyIndex(1))]",
+                    "adminUsername": "[parameters('adminUsername')]",
+                    "adminPassword": "[parameters('adminPassword')]",
+                    "linuxConfiguration": {
+                        "disablePasswordAuthentication": false,
+                        "ssh": {
+                            "publicKeys": [
+                                {
+                                    "path": "[concat('/home/',parameters('adminUsername'),'/.ssh/authorized_keys')]",
+                                    "keyData": "[parameters('sshKeyData')]"
+                                }
+                            ]
+                        }
+                    }
+                },
+                "networkProfile": {
+                    "networkInterfaces": [
+                        {
+                            "id": "[resourceId('Microsoft.Network/networkInterfaces', concat(variables('clusterName'), '-infra-', copyIndex(1), '-VMNic'))]"
+                        }
+                    ]
+                }
+            }
+        },
+        {
+            "apiVersion": "2017-09-01",
+            "type": "Microsoft.Authorization/roleAssignments",
+            "copy": {
+                "name": "infraVMRoleLoop",
+                "count": "[parameters('numberOfInfraVM')]"
+            },
+            "name": "[guid(concat(variables('clusterName'), '-infra-', copyIndex(1), '-Role'))]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Compute/virtualMachines', concat(variables('clusterName'), '-infra-', copyIndex(1)))]"
+            ],
+            "properties": {
+                "roleDefinitionId": "[variables('OwnerRole')]",
+                "principalId": "[reference(resourceId('Microsoft.Compute/virtualMachines', concat(variables('clusterName'), '-infra-', copyIndex(1))), '2017-12-01', 'Full').identity.principalId]",
+                "scope": "[resourceGroup().id]"
+            }
+        },
+        {
+            "apiVersion": "2017-12-01",
+            "type": "Microsoft.Compute/virtualMachines/extensions",
+            "copy": {
+                "name": "infraVMExtensionLoop",
+                "count": "[parameters('numberOfInfraVM')]"
+            },
+            "name": "[concat(variables('clusterName'), '-infra-', copyIndex(1), '/bootstrap')]",
+            "location": "[parameters('location')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Compute/virtualMachines', concat(variables('clusterName'), '-infra-', copyIndex(1)))]",
+                "[resourceId('Microsoft.Authorization/roleAssignments', guid(concat(variables('clusterName'), '-infra-', copyIndex(1), '-Role')))]"
+            ],
+            "properties": {
+                "publisher": "Microsoft.Azure.Extensions",
+                "type": "CustomScript",
+                "typeHandlerVersion": "2.0",
+                "autoUpgradeMinorVersion": true,
+                "settings": {
+                    "fileUris": [
+                        "[uri(parameters('_artifactsLocation'), concat('config.sh', parameters('_artifactsLocationSasToken')))]"
+                    ],
+                    "timestamp": 9829381811121329
+                },
+                "protectedSettings": {
+                    "commandToExecute": "[concat('bash config.sh ', parameters('adminUsername'), ' ', parameters('gitlocation'), ' ', variables('gitdeploykeyQ'), ' ', parameters('gitscript'), ' Azure ', parameters('adminUsername'), ' ', variables('paramsQ'))]"
+                }
+            }
+        }
+    ],
+    "outputs": {
+        "inframachine" : {
+            "type": "string",
+            "value": "[reference(concat(variables('clusterName'), '-infra-1', '-PublicIP')).dnsSettings.fqdn]"
+        }
+    }
+}
+
