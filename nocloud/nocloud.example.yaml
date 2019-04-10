@@ -1,9 +1,4 @@
 adminUsername: core
-sshKeyData: ssh-rsa <SSH PublicKey>== name@example.com
 clusterAdmins: name@example.com
-devSourceIP:
-  - IP0
-  - IP1
-  - IPs allowed to ssh to nodes
 pod_cidr: 192.168.0.0/16
 gitdeploykey: <Git Deployment Key>

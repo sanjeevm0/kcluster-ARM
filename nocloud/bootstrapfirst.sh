@@ -1,5 +1,13 @@
 #!/bin/bash
 
+# To use:
+# mkdir ~/tmpconfig
+# cd ~/tmpconfig
+# wget https://raw.githubusercontent.com/sanjeevm0/kcluster-ARM/master/nocloud/bootstrapfirst.sh
+# bash ./bootstrapfirst.sh
+# edit file nocloud.yaml
+# python3 ./bootstrapfirst.py nocloud.yaml
+
 sudo apt-get update 
 sudo apt-get install -y --no-install-recommends \
   python3-pip \

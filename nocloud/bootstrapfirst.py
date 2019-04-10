@@ -22,7 +22,7 @@ if __name__ == '__main__':
     }
     with open(configFile, 'r') as fp:
         config = config.update(yaml.load(fp))
-    with open('/home/{0}/.ssh/authorized_keys', 'r') as fp:
+    with open('/home/{0}/.ssh/authorized_keys'.format(config['adminUsername']), 'r') as fp:
         sshKeyData = fp.read().strip()
     config['sshKeyData'] = sshKeyData
     config['gitdeploykeyB'] = base64.b64encode(config['gitdeploykey'].encode()).decode()
