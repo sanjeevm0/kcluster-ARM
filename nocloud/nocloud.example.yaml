@@ -1,4 +1,5 @@
 adminUsername: core
 clusterAdmins: name@example.com
+fqdn: FQDN of machine
 pod_cidr: 192.168.0.0/16
 gitdeploykey: <Git Deployment Key>
