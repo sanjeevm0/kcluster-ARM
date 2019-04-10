@@ -4,6 +4,8 @@ import yaml
 import pathlib
 import json
 import base64
+import string
+import random
 
 if __name__ == '__main__':
     configFile = sys.argv[1]
@@ -25,6 +27,7 @@ if __name__ == '__main__':
     with open('/home/{0}/.ssh/authorized_keys'.format(config['adminUsername']), 'r') as fp:
         sshKeyData = fp.read().strip()
     config['sshKeyData'] = sshKeyData
+    config['clusterName'] = ''.join(random.choice(string.ascii_lowercase) for i in range(16))
     config['gitdeploykeyB'] = base64.b64encode(config['gitdeploykey'].encode()).decode()
     script = "https://raw.githubusercontent.com/sanjeevm0/ARMConfig/master/config.sh"
     pathlib.Path("/home/{0}/tmpconfig".format(config['adminUsername'])).mkdir(parents=True, exist_ok=True)
