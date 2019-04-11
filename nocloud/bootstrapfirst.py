@@ -10,6 +10,8 @@ import random
 if __name__ == '__main__':
     configFile = sys.argv[1]
     config = {
+        "_artifactsLocation": "https://raw.githubusercontent.com/sanjeevm0/ARMConfig/master/",
+        "_artifactsLocationSasToken": "",
         "cloudProvider": "NoCloud",
         "adminUsername": "core",
         "numberOfInfraVM": 1,
