@@ -22,13 +22,6 @@
                 "description": "Username on machines."
             }            
         },
-        "adminPassword": {
-            "type": "securestring",
-            "defaultValue": "[concat('UU##12', uniqueString(resourceGroup().id, parameters('sshKeyData'), 'pp', '!'))]",
-            "metadata": {
-              "description": "Password for the virtual machines ."
-            }
-        },
         "sshKeyData": {
             "type": "string",
             "defaultValue": "",
@@ -140,12 +133,12 @@
         "podsubnet": "10.240.0.0/16",
         "gitdeploykeyB": "[base64(parameters('gitdeploykey'))]",
         "ubuntuOSVersion": "18.04-LTS",
+        "numberBootstrap": 1,
         "params": {
             "resource_group": "[resourceGroup().name]",
             "clusterName": "[variables('clusterName')]",
             "location": "[parameters('location')]",
             "adminUsername": "[parameters('adminUsername')]",
-            "adminPassword": "[parameters('adminPassword')]",
             "sshKeyData": "[parameters('sshKeyData')]",
             "clusterAdmins": "[parameters('clusterAdmins')]",
             "devSourceIP": "[parameters('devSourceIP')]",
@@ -246,7 +239,7 @@
             "type": "Microsoft.Network/publicIPAddresses",
             "copy": {
                 "name": "infraVMPublicIPLoop",
-                "count": "[parameters('numberOfInfraVM')]"
+                "count": "[variables('numberBootstrap')]"
             },
             "sku": {
                 "name": "Basic"
@@ -265,7 +258,7 @@
             "type": "Microsoft.Network/networkInterfaces",
             "copy": {
                 "name": "infraVMNICLoop",
-                "count": "[parameters('numberOfInfraVM')]"
+                "count": "[variables('numberBootstrap')]"
             },
             "name": "[concat(variables('clusterName'), '-infra-', copyIndex(1), '-VMNic')]",
             "apiVersion": "2018-02-01",
@@ -301,7 +294,7 @@
             "type": "Microsoft.Compute/virtualMachines",
             "copy": {
                 "name": "infraVMLoop",
-                "count": "[parameters('numberOfInfraVM')]"
+                "count": "[variables('numberBootstrap')]"
             },
             "name": "[concat(variables('clusterName'), '-infra-', copyIndex(1))]",
             "apiVersion": "2017-12-01",
@@ -334,9 +327,8 @@
                 "osProfile": {
                     "computerName": "[concat(variables('clusterName'), '-infra-', copyIndex(1))]",
                     "adminUsername": "[parameters('adminUsername')]",
-                    "adminPassword": "[parameters('adminPassword')]",
                     "linuxConfiguration": {
-                        "disablePasswordAuthentication": false,
+                        "disablePasswordAuthentication": true,
                         "ssh": {
                             "publicKeys": [
                                 {
@@ -361,7 +353,7 @@
             "type": "Microsoft.Authorization/roleAssignments",
             "copy": {
                 "name": "infraVMRoleLoop",
-                "count": "[parameters('numberOfInfraVM')]"
+                "count": "[variables('numberBootstrap')]"
             },
             "name": "[guid(concat(variables('clusterName'), '-infra-', copyIndex(1), '-Role'))]",
             "dependsOn": [
@@ -378,7 +370,7 @@
             "type": "Microsoft.Compute/virtualMachines/extensions",
             "copy": {
                 "name": "infraVMExtensionLoop",
-                "count": "[parameters('numberOfInfraVM')]"
+                "count": "[variables('numberBootstrap')]"
             },
             "name": "[concat(variables('clusterName'), '-infra-', copyIndex(1), '/bootstrap')]",
             "location": "[parameters('location')]",
