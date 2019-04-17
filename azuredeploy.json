@@ -151,6 +151,7 @@
             "minWorkerVM": "[parameters('minWorkerVM')]",
             "maxWorkerVM": "[parameters('maxWorkerVM')]",
             "workerVMSize": "[parameters('workerVMSize')]",
+            "numberBootstrap": "[variables('numberBootstrap')]",
             "ubuntuOSVersion": "[variables('ubuntuOSVersion')]",
             "gitlocation": "[parameters('gitlocation')]",
             "gitscript": "[parameters('gitscript')]",
