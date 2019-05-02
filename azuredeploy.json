@@ -78,6 +78,27 @@
                 "description": "Size of the worker-VM. Use a GPU VM for worker-VM."
             }
         },
+        "customkubecri": {
+            "type": "bool",
+            "metadata": {
+                "description": "Use custom Kube CRI or not."
+            },
+            "defaultValue": false
+        },
+        "customkubescheduler": {
+            "type": "bool",
+            "metadata": {
+                "description": "Use custom Kube Scheduler or not."
+            },
+            "defaultValue": false
+        },
+        "kubeloglevel": {
+            "type": "int",
+            "defaultValue": 2,
+            "metadata": {
+                "description": "Log level of Kubernetes." 
+            }
+        },
         "gitlocation": {
             "type": "string",
             "metadata": {
@@ -146,6 +167,9 @@
             "pod_ip_prefix": "[variables('podprefix')]",
             "pod_cidr": "[variables('podsubnet')]",
             "use_azure_cni": "[parameters('useazurecni')]",
+            "custom_kube_scheduler": "[parameters('customkubescheduler')]",
+            "custom_kube_cri": "[parameters('customkubecri')]",
+            "kube_log_level": "[parameters('kubeloglevel')]",
             "numberOfInfraVM": "[parameters('numberOfInfraVM')]",
             "infraVMSize": "[parameters('infraVMSize')]",
             "minWorkerVM": "[parameters('minWorkerVM')]",

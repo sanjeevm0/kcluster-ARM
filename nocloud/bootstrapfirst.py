@@ -15,6 +15,7 @@ if __name__ == '__main__':
         "cloudProvider": "NoCloud",
         "adminUsername": "core",
         "numberOfInfraVM": 1,
+        "numberBootstrap": 1,
         "minWorkerVM": 0,
         "maxWorkerVM": 0,
         "gitlocation": "sanjeevm0/kcluster/master",
