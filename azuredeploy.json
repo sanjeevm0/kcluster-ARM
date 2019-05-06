@@ -388,7 +388,7 @@
                 "autoUpgradeMinorVersion": true,
                 "settings": {
                     "fileUris": [
-                        "[uri(parameters('_artifactsLocation'), concat('config.sh', parameters('_artifactsLocationSasToken')))]"
+                        "[uri(variables('params')._artifactsLocation, concat('config.sh', variables('params')._artifactsLocationSasToken))]"
                     ],
                     "timestamp": 9829381811121329
                 },
