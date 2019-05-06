@@ -78,66 +78,45 @@
                 "description": "Size of the worker-VM. Use a GPU VM for worker-VM."
             }
         },
-        "customkubecri": {
+        "customKubeCRI": {
             "type": "bool",
             "metadata": {
-                "description": "Use custom Kube CRI or not."
+                "description": "Use custom Kubernetes CRI or not."
             },
             "defaultValue": false
         },
-        "customkubescheduler": {
+        "customKubeScheduler": {
             "type": "bool",
             "metadata": {
-                "description": "Use custom Kube Scheduler or not."
+                "description": "Use custom Kubernetes Scheduler or not."
             },
             "defaultValue": false
         },
-        "kubeloglevel": {
+        "kubeLogLevel": {
             "type": "int",
             "defaultValue": 2,
             "metadata": {
                 "description": "Log level of Kubernetes." 
             }
         },
-        "gitlocation": {
+        "gitLocation": {
             "type": "string",
             "metadata": {
                 "description": "The repo and branch where code is located."
             },
             "defaultValue": "sanjeevm0/kcluster/master"
         },
-        "gitscript": {
+        "gitScript": {
             "type": "string",
             "metadata": {
                 "description": "The script to run."
             },
             "defaultValue": "scripts/bootstrap.sh"
         },
-        "gitdeploykey": {
+        "gitDeployKey": {
             "type": "string",
             "metadata": {
                 "description": "The git deploy key."
-            },
-            "defaultValue": ""
-        },
-        "useazurecni": {
-            "type": "bool",
-            "metadata": {
-                "description": "Use Azure CNI or not."
-            },
-            "defaultValue": false
-        },
-        "_artifactsLocation": {
-            "type": "string",
-            "metadata": {
-                "description": "The base URI where artifacts required by this template are located including a trailing '/'"
-            },
-            "defaultValue": "https://raw.githubusercontent.com/sanjeevm0/ARMConfig/master/"
-        },
-        "_artifactsLocationSasToken": {
-            "type": "securestring",
-            "metadata": {
-                "description": "The sasToken required to access _artifactsLocation.  When the template is deployed using the accompanying scripts, a sasToken will be automatically generated. Use the defaultValue if the staging location is not secured."
             },
             "defaultValue": ""
         }
@@ -149,10 +128,9 @@
         "imageOffer": "UbuntuServer",
         "virtualNetworkName": "[concat(resourceGroup().name, '-VNet')]",
         "vmprefix": "10.240.1",
-        "vmsubnet": "10.240.0.0/16",
         "podprefix": "10.240",
         "podsubnet": "10.240.0.0/16",
-        "gitdeploykeyB": "[base64(parameters('gitdeploykey'))]",
+        "gitDeployKeyB": "[base64(parameters('gitDeployKey'))]",
         "ubuntuOSVersion": "18.04-LTS",
         "numberBootstrap": 1,
         "params": {
@@ -166,10 +144,10 @@
             "machine_ip_prefix": "[variables('vmprefix')]",
             "pod_ip_prefix": "[variables('podprefix')]",
             "pod_cidr": "[variables('podsubnet')]",
-            "use_azure_cni": "[parameters('useazurecni')]",
-            "custom_kube_scheduler": "[parameters('customkubescheduler')]",
-            "custom_kube_cri": "[parameters('customkubecri')]",
-            "kube_log_level": "[parameters('kubeloglevel')]",
+            "use_azure_cni": false,
+            "custom_kube_scheduler": "[parameters('customKubeScheduler')]",
+            "custom_kube_cri": "[parameters('customKubeCRI')]",
+            "kube_log_level": "[parameters('kubeLogLevel')]",
             "numberOfInfraVM": "[parameters('numberOfInfraVM')]",
             "infraVMSize": "[parameters('infraVMSize')]",
             "minWorkerVM": "[parameters('minWorkerVM')]",
@@ -177,11 +155,11 @@
             "workerVMSize": "[parameters('workerVMSize')]",
             "numberBootstrap": "[variables('numberBootstrap')]",
             "ubuntuOSVersion": "[variables('ubuntuOSVersion')]",
-            "gitlocation": "[parameters('gitlocation')]",
-            "gitscript": "[parameters('gitscript')]",
-            "gitdeploykeyB": "[variables('gitdeploykeyB')]",
-            "_artifactsLocation": "[parameters('_artifactsLocation')]",
-            "_artifactsLocationSasToken": "[parameters('_artifactsLocationSasToken')]",
+            "gitlocation": "[parameters('gitLocation')]",
+            "gitscript": "[parameters('gitScript')]",
+            "gitdeploykeyB": "[variables('gitDeployKeyB')]",
+            "_artifactsLocation": "https://raw.githubusercontent.com/sanjeevm0/ARMConfig/master/",
+            "_artifactsLocationSasToken": "",
             "standardStorageAccountType": "[variables('standardStorageAccountType')]",
             "imagePublisher": "[variables('imagePublisher')]",
             "imageOffer": "[variables('imageOffer')]",
