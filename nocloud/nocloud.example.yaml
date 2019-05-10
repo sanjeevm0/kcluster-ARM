@@ -2,4 +2,6 @@ adminUsername: core
 clusterAdmins: name@example.com
 fqdn: FQDN of machine
 pod_cidr: 192.168.0.0/16
+custom_kube_scheduler: False
+custom_kube_cri: False
 gitdeploykey: <Git Deployment Key>
