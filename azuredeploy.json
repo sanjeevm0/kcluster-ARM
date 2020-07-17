@@ -119,6 +119,13 @@
                 "description": "The git deploy key."
             },
             "defaultValue": ""
+        },
+        "azure_cni": {
+            "type": "bool",
+            "metadata": {
+                "description": "Use Azure CNI or not."
+            },
+            "defaultValue": false
         }
     },
     "variables": {
@@ -127,9 +134,9 @@
         "imagePublisher": "Canonical",
         "imageOffer": "UbuntuServer",
         "virtualNetworkName": "[concat(resourceGroup().name, '-VNet')]",
-        "vmprefix": "10.240.1",
+        "vmprefix": "10.240.255",
         "podprefix": "10.240",
-        "podsubnet": "10.240.0.0/16",
+        "pod_cidr": "10.240.0.0/15",
         "gitDeployKeyB": "[base64(parameters('gitDeployKey'))]",
         "ubuntuOSVersion": "18.04-LTS",
         "numberBootstrap": 1,
@@ -143,8 +150,8 @@
             "devSourceIP": "[parameters('devSourceIP')]",
             "machine_ip_prefix": "[variables('vmprefix')]",
             "pod_ip_prefix": "[variables('podprefix')]",
-            "pod_cidr": "[variables('podsubnet')]",
-            "use_azure_cni": false,
+            "pod_cidr": "[variables('pod_cidr')]",
+            "use_azure_cni": "[parameters('azure_cni')]",
             "custom_kube_scheduler": "[parameters('customKubeScheduler')]",
             "custom_kube_cri": "[parameters('customKubeCRI')]",
             "kube_log_level": "[parameters('kubeLogLevel')]",
