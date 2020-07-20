@@ -126,6 +126,13 @@
                 "description": "Use Azure CNI or not."
             },
             "defaultValue": false
+        },
+        "accelerated_networking": {
+            "type": "bool",
+            "metadata": {
+                "description": "Use Accelerated Networking on agent nodes - single root I/O virtualization (SR-IOV)"
+            },
+            "defaultValue": false
         }
     },
     "variables": {
@@ -152,6 +159,7 @@
             "pod_ip_prefix": "[variables('podprefix')]",
             "pod_cidr": "[variables('pod_cidr')]",
             "use_azure_cni": "[parameters('azure_cni')]",
+            "accelerated_networking": "[parameters('accelerated_networking')]",
             "custom_kube_scheduler": "[parameters('customKubeScheduler')]",
             "custom_kube_cri": "[parameters('customKubeCRI')]",
             "kube_log_level": "[parameters('kubeLogLevel')]",
@@ -279,6 +287,7 @@
                 "[resourceId('Microsoft.Network/publicIPAddresses', concat(variables('clusterName'), '-infra-', copyIndex(1), '-PublicIP'))]"
             ],
             "properties": {
+                "enableAcceleratedNetworking": false,
                 "ipConfigurations": [
                     {
                         "name": "[concat(variables('clusterName'), '-infra-', copyIndex(1), '-IPConfig')]",
