@@ -133,6 +133,13 @@
                 "description": "Use Accelerated Networking on agent nodes - single root I/O virtualization (SR-IOV)"
             },
             "defaultValue": false
+        },
+        "dual_nic_dpdk": {
+            "type": "bool",
+            "metadata": {
+                "description": "Create two NICs, 2nd one will use SR-IOV, and DPDK installed on VMs"
+            },
+            "defaultValue": false
         }
     },
     "variables": {
@@ -160,6 +167,7 @@
             "pod_cidr": "[variables('pod_cidr')]",
             "use_azure_cni": "[parameters('azure_cni')]",
             "accelerated_networking": "[parameters('accelerated_networking')]",
+            "dual_nic_dpdk": "[parameters('dual_nic_dpdk')]",
             "custom_kube_scheduler": "[parameters('customKubeScheduler')]",
             "custom_kube_cri": "[parameters('customKubeCRI')]",
             "kube_log_level": "[parameters('kubeLogLevel')]",
