@@ -130,14 +130,21 @@
         "accelerated_networking": {
             "type": "bool",
             "metadata": {
-                "description": "Use Accelerated Networking on agent nodes - single root I/O virtualization (SR-IOV)"
+                "description": "Use Accelerated Networking (SR-IOV) on primary NIC on agent node"
             },
             "defaultValue": false
         },
-        "dual_nic_dpdk": {
+        "multi_nic_dpdk": {
+            "type": "int",
+            "metadata": {
+                "description": "Create additional NICs using accelerated networking SR-IOV, and install DPDK"
+            },
+            "defaultValue": 0
+        },
+        "enable_cpu_pinning": {
             "type": "bool",
             "metadata": {
-                "description": "Create two NICs, 2nd one will use SR-IOV, and DPDK installed on VMs"
+                "description": "Allow pods to have exclusive access to CPU cores (host processes can still run on core though)"
             },
             "defaultValue": false
         }
@@ -167,7 +174,8 @@
             "pod_cidr": "[variables('pod_cidr')]",
             "use_azure_cni": "[parameters('azure_cni')]",
             "accelerated_networking": "[parameters('accelerated_networking')]",
-            "dual_nic_dpdk": "[parameters('dual_nic_dpdk')]",
+            "multi_nic_dpdk": "[parameters('multi_nic_dpdk')]",
+            "enable_cpu_pinning": "[parameters('enable_cpu_pinning')]",
             "custom_kube_scheduler": "[parameters('customKubeScheduler')]",
             "custom_kube_cri": "[parameters('customKubeCRI')]",
             "kube_log_level": "[parameters('kubeLogLevel')]",
