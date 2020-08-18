@@ -27,9 +27,11 @@ if __name__ == '__main__':
     }
     with open(configFile, 'r') as fp:
         config.update(yaml.safe_load(fp))
-    with open('/home/{0}/.ssh/authorized_keys'.format(config['adminUsername']), 'r') as fp:
-        sshKeyData = fp.read().strip()
-    config['sshKeyData'] = sshKeyData
+    authfile = '/home/{0}/.ssh/authorized_keys'.format(config['adminUsername'])
+    if os.path.exists(authfile):
+        with open(authfile, 'r') as fp:
+            sshKeyData = fp.read().strip()
+            config['sshKeyData'] = sshKeyData
     config['clusterName'] = ''.join(random.choice(string.ascii_lowercase) for i in range(16))
     config['gitdeploykeyB'] = base64.b64encode(config['gitdeploykey'].encode()).decode()
     script = "https://raw.githubusercontent.com/sanjeevm0/ARMConfig/master/config.sh"

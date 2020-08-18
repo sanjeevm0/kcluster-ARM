@@ -1,8 +1,12 @@
 adminUsername: core
 clusterAdmins: name@example.com
-fqdn: FQDN of machine
+fqdn: <FQDN>
 pod_cidr: 10.244.0.0/16
-selfSignedCert: False
+selfSignedCert: True
+enable_cpu_pinning: True
+master_node_service: False
+worker_node: True
+netInterface: eth0
 custom_kube_scheduler: False
 custom_kube_cri: False
 gitdeploykey: <Git Deployment Key>
