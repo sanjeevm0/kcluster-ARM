@@ -156,6 +156,7 @@
         "imageOffer": "UbuntuServer",
         "virtualNetworkName": "[concat(resourceGroup().name, '-VNet')]",
         "vmprefix": "10.240.255",
+        "accelprefix": "10.241.255",
         "podprefix": "10.240",
         "pod_cidr": "10.240.0.0/15",
         "gitDeployKeyB": "[base64(parameters('gitDeployKey'))]",
@@ -170,6 +171,7 @@
             "clusterAdmins": "[parameters('clusterAdmins')]",
             "devSourceIP": "[parameters('devSourceIP')]",
             "machine_ip_prefix": "[variables('vmprefix')]",
+            "accel_ip_prefix": "[variables('accelprefix')]",
             "pod_ip_prefix": "[variables('podprefix')]",
             "pod_cidr": "[variables('pod_cidr')]",
             "use_azure_cni": "[parameters('azure_cni')]",
@@ -214,13 +216,19 @@
             "location": "[parameters('location')]",
             "properties": {
                 "addressSpace": {
-                    "addressPrefixes": ["10.240.0.0/16"]
+                    "addressPrefixes": ["10.240.0.0/15"]
                 },
                 "subnets": [
                     {
                         "name": "VMSubnet",
                         "properties": {
                             "addressPrefix": "10.240.0.0/16"
+                        }
+                    },
+                    {
+                        "name": "AccelSubnet",
+                        "properties": {
+                            "addressPrefix": "10.241.0.0/16"
                         }
                     }
                 ]
