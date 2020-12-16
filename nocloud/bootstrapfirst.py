@@ -18,7 +18,7 @@ if __name__ == '__main__':
         "numberBootstrap": 1,
         "minWorkerVM": 0,
         "maxWorkerVM": 0,
-        "gitlocation": "sanjeevm0/kcluster/master",
+        "gitlocation": "sanjeevm0/kcluster/centos",
         "gitscript": "scripts/bootstrap.sh",
         "masterNode": True,
         "workerNode": False,
@@ -34,7 +34,7 @@ if __name__ == '__main__':
             config['sshKeyData'] = sshKeyData
     config['clusterName'] = ''.join(random.choice(string.ascii_lowercase) for i in range(16))
     config['gitdeploykeyB'] = base64.b64encode(config['gitdeploykey'].encode()).decode()
-    script = "https://raw.githubusercontent.com/sanjeevm0/ARMConfig/master/config.sh"
+    script = "https://raw.githubusercontent.com/sanjeevm0/ARMConfig/centos/config.sh"
     pathlib.Path("/home/{0}/tmpconfig".format(config['adminUsername'])).mkdir(parents=True, exist_ok=True)
     os.system("wget {0} -O /home/{1}/tmpconfig/config.sh".format(script, config['adminUsername']))
     commandParams = "{0} {1} '{2}' {3} {4} {0} \\'{5}\\'".format(
